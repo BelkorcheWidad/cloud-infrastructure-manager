@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql   # MySQL image
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root   # Set your MySQL root password
+      MYSQL_DATABASE: test1          # Optional: Set a default database
+
+    ports:
+      - "3306:3306"  # Expose MySQL port
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: amd64/phpmyadmin # phpMyAdmin image
+    container_name: phpmyadmin-container
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql  # Link phpMyAdmin to the MySQL service
+      PMA_USER: root   # Optional: Set the user to connect
+      PMA_PASSWORD: root  # Optional: Set the user's password
+    ports:
+      - "3737:80"  # Access phpMyAdmin at localhost:8080
+
+volumes:
+  mysql_data:

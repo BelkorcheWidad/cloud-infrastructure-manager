@@ -1,0 +1,99 @@
+version: '3.8'
+
+# One-command demo: docker compose up --build
+# Runs the full platform: Axon Server, MySQL, MongoDB and the 3 services.
+
+services:
+  # ---------- Infrastructure ----------
+  axonserver:
+    image: axoniq/axonserver
+    container_name: axon-server
+    ports:
+      - "8024:8024"  # HTTP UI
+      - "8124:8124"  # gRPC
+
+  mysql:
+    image: mysql
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: amd64/phpmyadmin
+    container_name: phpmyadmin-container
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "3737:80"
+
+  mongodb:
+    image: mongo
+    container_name: mongo-container
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # ---------- Application services ----------
+  dc-command:
+    build:
+      context: .
+      dockerfile: cloudinfra-dc-command/Dockerfile
+    container_name: cloudinfra-dc-command
+    depends_on:
+      - axonserver
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/datacenter-bdd?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      AXON_AXONSERVER_SERVERS: axonserver:8124
+    ports:
+      - "9081:9081"
+
+  vm-command:
+    build:
+      context: .
+      dockerfile: cloudinfra-vm-command/Dockerfile
+    container_name: cloudinfra-vm-command
+    depends_on:
+      - axonserver
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/vm-bdd?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      AXON_AXONSERVER_SERVERS: axonserver:8124
+    ports:
+      - "9080:9080"
+
+  query-mongo:
+    build:
+      context: .
+      dockerfile: cloudinfra-query-mongo/Dockerfile
+    container_name: cloudinfra-query-mongo
+    depends_on:
+      - axonserver
+      - mongodb
+    environment:
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: "27017"
+      SPRING_DATA_MONGODB_DATABASE: status-bdd
+      AXON_AXONSERVER_SERVERS: axonserver:8124
+    ports:
+      - "9082:9082"
+
+volumes:
+  mysql_data:
+  mongo_data:

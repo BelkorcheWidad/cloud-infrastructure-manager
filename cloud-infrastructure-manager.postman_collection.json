@@ -1,0 +1,324 @@
+{
+	"info": {
+		"_postman_id": "0fa7be23-4ba0-465f-86c5-58c03186f755",
+		"name": "Cloud Infrastructure Manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15255541"
+	},
+	"item": [
+		{
+			"name": "Add DataCenter",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"idDataCenter\":\"1\",\r\n    \"city\":\"oran\",\r\n    \"capacity\":\"100\",\r\n    \"region\":\"eu-west-1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:9081/command/datacenter",
+					"host": [
+						"localhost"
+					],
+					"port": "9081",
+					"path": [
+						"command",
+						"datacenter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Server",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"idServer\":\"1\",\r\n     \"configuration\":{\r\n           \"cpu\":\"10\",   \"ram\":\"160\", \"disk\":\"1000\"\r\n                       }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:9081/command/datacenter/1/server",
+					"host": [
+						"localhost"
+					],
+					"port": "9081",
+					"path": [
+						"command",
+						"datacenter",
+						"1",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Decommission Server",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:9081/command/datacenter/1/servers/1/decommission",
+					"host": [
+						"localhost"
+					],
+					"port": "9081",
+					"path": [
+						"command",
+						"datacenter",
+						"1",
+						"servers",
+						"1",
+						"decommission"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete server",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:9081/command/datacenter/1/1",
+					"host": [
+						"localhost"
+					],
+					"port": "9081",
+					"path": [
+						"command",
+						"datacenter",
+						"1",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"idUser\":\"100\",\r\n    \"name\":\"alice\",\r\n    \"email\":\"alice@example.com\"\r\n}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:9080/command/user",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"command",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Vm",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"idVm\":\"2\",\r\n    \"configuration\":{\r\n           \"cpu\":\"25\",   \"ram\":\"106\", \"disk\":\"100\"\r\n                       },\r\n     \"idServer\" :\"1\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:9080/command/user/100/vm",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"command",
+						"user",
+						"100",
+						"vm"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stop Vm",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:9080/command/user/100/vms/2/stop",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"command",
+						"user",
+						"100",
+						"vms",
+						"2",
+						"stop"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Vm",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:9080/command/user/100/vms/2/start",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"command",
+						"user",
+						"100",
+						"vms",
+						"2",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteVM",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:9080/command/user/100/2",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"command",
+						"user",
+						"100",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9082/query/datacenters",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9082",
+					"path": [
+						"query",
+						"datacenters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Server details (with VMs)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9082/query/servers/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9082",
+					"path": [
+						"query",
+						"servers",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VMs on a server",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9082/query/servers/1/vms",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9082",
+					"path": [
+						"query",
+						"servers",
+						"1",
+						"vms"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  axonserver:
+    image: axoniq/axonserver
+    container_name: axon-server
+    ports:
+      - "8024:8024"  # HTTP UI
+      - "8124:8124"  # GRPC communication
+   
