@@ -1,16 +1,25 @@
 version: '3.8'
 
 # One-command demo: docker compose up --build
-# Runs the full platform: Axon Server, MySQL, MongoDB and the 3 services.
+# Runs the full platform: Axon Server, MySQL, MongoDB, phpMyAdmin, and the 3 services.
 
 services:
   # ---------- Infrastructure ----------
   axonserver:
     image: axoniq/axonserver
-    container_name: axon-server
+    container_name: axonserver
+    environment:
+      - AXONIQ_AXONSERVER_STANDALONE=true
+      - AXONIQ_AXONSERVER_HOSTNAME=axonserver
     ports:
       - "8024:8024"  # HTTP UI
-      - "8124:8124"  # gRPC
+      - "8124:8124"  # gRPC communication
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8024/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   mysql:
     image: mysql
@@ -22,13 +31,20 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   phpmyadmin:
     image: amd64/phpmyadmin
     container_name: phpmyadmin-container
     restart: always
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       PMA_HOST: mysql
       PMA_USER: root
@@ -44,6 +60,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   # ---------- Application services ----------
   dc-command:
@@ -52,13 +74,16 @@ services:
       dockerfile: cloudinfra-dc-command/Dockerfile
     container_name: cloudinfra-dc-command
     depends_on:
-      - axonserver
-      - mysql
+      axonserver:
+        condition: service_started
+      mysql:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/datacenter-bdd?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       AXON_AXONSERVER_SERVERS: axonserver:8124
+      AXON_AXONSERVER_CONTEXT: default
     ports:
       - "9081:9081"
 
@@ -68,13 +93,16 @@ services:
       dockerfile: cloudinfra-vm-command/Dockerfile
     container_name: cloudinfra-vm-command
     depends_on:
-      - axonserver
-      - mysql
+      axonserver:
+        condition: service_started
+      mysql:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/vm-bdd?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       AXON_AXONSERVER_SERVERS: axonserver:8124
+      AXON_AXONSERVER_CONTEXT: default
     ports:
       - "9080:9080"
 
@@ -84,13 +112,16 @@ services:
       dockerfile: cloudinfra-query-mongo/Dockerfile
     container_name: cloudinfra-query-mongo
     depends_on:
-      - axonserver
-      - mongodb
+      axonserver:
+        condition: service_started
+      mongodb:
+        condition: service_healthy
     environment:
       SPRING_DATA_MONGODB_HOST: mongodb
       SPRING_DATA_MONGODB_PORT: "27017"
       SPRING_DATA_MONGODB_DATABASE: status-bdd
       AXON_AXONSERVER_SERVERS: axonserver:8124
+      AXON_AXONSERVER_CONTEXT: default
     ports:
       - "9082:9082"
 
